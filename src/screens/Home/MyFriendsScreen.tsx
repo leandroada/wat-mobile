@@ -18,6 +18,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ArrowRight from '../../assets/icons/ArrowRight';
 import FriendCard from '../../components/FriendCard';
 import CrownIcon from '../../assets/icons/CrownIcon';
+import {
+  responsiveFontSize,
+  responsiveHeight,
+  responsiveWidth,
+} from 'react-native-responsive-dimensions';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -64,24 +69,46 @@ const MyFriendsScreen = () => {
 
           {/* User Card */}
           <View className="px-8 relative py-4 mb-2">
-            <View className="flex flex-row justify-between pb-10 items-center">
-              <View className="flex flex-row items-center gap-2">
-                <CircleImage image="https://randomuser.me/api/portraits/men/32.jpg" size={70} />
-                <View>
-                  <Text className="text-white text-2xl font-llewie">RANK #234</Text>
-                  <Text className="text-white text-4xl font-llewie">AL_25</Text>
+                        {/* User Card */}
+            <View className=" py-4 mb-2">
+              <View className="flex flex-row w-full gap-7 justify-between items-center mb-4">
+                <View className="flex flex-row items-center gap-2">
+                  <CircleImage
+                    image="https://randomuser.me/api/portraits/men/32.jpg"
+                    size={responsiveWidth(15)}
+                  />
+                  <View>
+                    <Text
+                      className="text-white font-llewie"
+                      style={{ fontSize: responsiveFontSize(2) }}
+                    >
+                      RANK #234
+                    </Text>
+                    <Text
+                      className="text-white font-llewie"
+                      style={{ fontSize: responsiveFontSize(3) }}
+                    >
+                      AL_25
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <View className="items-center">
-                <Text className="text-white text-md font-llewie pb-2" style={{ letterSpacing: 5 }}>
-                  POINTS:300
-                </Text>
-                <Text className="text-2xl">
-                  <CrownIcon width={30} height={30} />
-                  <CrownIcon width={30} height={30} />
-                  <CrownIcon width={30} height={30} />
-                  <CrownIcon width={30} height={30} />
-                </Text>
+                <View className="items-center justify-center ">
+                  <Text
+                    className="text-white font-llewie"
+                    style={{
+                      letterSpacing: 5,
+                      fontSize: responsiveFontSize(1.7),
+                    }}
+                  >
+                    POINTS:300
+                  </Text>
+                  <View className="flex-row justify-center items-end" style={{marginTop:responsiveWidth(-1)}}>
+                    <CrownIcon width={responsiveWidth(7.5)} height={responsiveWidth(7.5)} />
+                    <CrownIcon width={responsiveWidth(8)} height={responsiveWidth(8)} />
+                    <CrownIcon width={responsiveWidth(8.5)} height={responsiveWidth(8.5)} />
+                    <CrownIcon width={responsiveWidth(9)} height={responsiveWidth(9)} />
+                  </View>
+                </View>
               </View>
             </View>
 

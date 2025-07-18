@@ -7,8 +7,9 @@ import AudioScreen from '../../screens/Setting/AudioScreen';
 import NotificationScreen from '../../screens/Setting/NotificationScreen';
 import ProfileScreen from '../../screens/Setting/ProfileScreen';
 import SupportScreen from '../../screens/Setting/SupportScreen';
-import GeneralScreen from '../../screens/Setting/GeneralScreen';
+import GeneralScreen from '../../screens/Setting/PlayAndTutorialScreen';
 import PrivacyScreen from '../../screens/Setting/PrivacyScreen';
+import PlayAndTutorialScreen from '../../screens/Setting/PlayAndTutorialScreen';
 const Stack = createNativeStackNavigator();
 const SettingStack = () => {
   return (
@@ -19,7 +20,7 @@ const SettingStack = () => {
       <Stack.Screen name="Support" component={SupportScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Notification" component={NotificationScreen} />
-      <Stack.Screen name="General" component={GeneralScreen} />
+      <Stack.Screen name="playtutorial" component={PlayAndTutorialScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} />
     </Stack.Navigator>
   )

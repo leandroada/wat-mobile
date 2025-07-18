@@ -1,16 +1,16 @@
 import React from 'react';
 import {
-  Text,
   View,
+  Text,
   ImageBackground,
   ScrollView,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import { responsiveFontSize, responsiveHeight } from 'react-native-responsive-dimensions';
+import { Image } from 'react-native';
 
-const AboutScreen = () => {
+const PlayAndTutorialScreen = () => {
   return (
     <View className="flex-1 bg-primary -z-10">
       {/* Top 20% Background Dots */}
@@ -34,57 +34,45 @@ const AboutScreen = () => {
         />
       </View>
       <SafeAreaView edges={['top']} className="flex-1">
-        {/* <ScrollView
+        <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        > */}
+          // contentContainerStyle={{ paddingBottom: 20 }}
+        >
           <View className="w-full">
             {/* Header */}
             <View className="mb-6 items-center">
               <CustomHeader />
             </View>
 
-            {/* Content */}
-            <View className="w-full px-6 py-8 bg-textLight h-full rounded-t-3xl">
+            {/* Options */}
+            <View className="w-full px-6 py-8 bg-textLight rounded-t-3xl" style={{height: responsiveHeight(100)}}>
               <Text
-                className="font-llewie text-primary mt-2"
+                className="font-llewie text-primary"
                 style={{ fontSize: responsiveFontSize(5) }}
               >
-                About
+                How to Play & Tutorial
               </Text>
 
-              <View className="flex gap-2 px-2 mt-9">
-                <Text
-                  className="font-llewie text-primary"
-                  style={{ fontSize: responsiveFontSize(3.5) }}
-                >
-                  Version Number
-                </Text>
-                <Text
-                  className="font-llewie text-primary"
-                  style={{ fontSize: responsiveFontSize(3.5) }}
-                >
-                  Terms of Service
-                </Text>
-                <Text
-                  className="font-llewie text-primary"
-                  style={{ fontSize: responsiveFontSize(3.5) }}
-                >
-                  Privacy Policy
-                </Text>
-                <Text
-                  className="font-llewie text-primary"
-                  style={{ fontSize: responsiveFontSize(4) }}
-                >
-                  "With a Twist" Vision
-                </Text>
+              <View className="flex gap-1 px-2 mt-10">
+                {['Quick-Start Guide', 'Puzzle Tutorial', 'Advance Tips & Scoring'].map(
+                  (label, index) => (
+                    <View key={index}>
+                      <Text
+                        className="font-llewie text-primary"
+                        style={{ fontSize: responsiveFontSize(3.5) }}
+                      >
+                        {label}
+                      </Text>
+                    </View>
+                  )
+                )}
               </View>
             </View>
           </View>
-        {/* </ScrollView> */}
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
 };
 
-export default AboutScreen;
+export default PlayAndTutorialScreen;

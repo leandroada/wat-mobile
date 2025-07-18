@@ -11,6 +11,7 @@ import {
   Keyboard,
   Platform,
   Dimensions,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextInput } from 'react-native-gesture-handler';
@@ -18,14 +19,14 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import CustomHeader from '../../components/CustomHeader';
 import CircleImage from '../../components/CircleImage';
-
-const screenHeight = Dimensions.get('window').height;
+import { responsiveFontSize, responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
+import { API_BASE_URL } from '@env';
 
 type FormState = {
   firstName: string;
   lastName: string;
   username: string;
-  password: string;
+  // password: string;
   email: string;
   phone: string;
 };
@@ -36,7 +37,7 @@ const ProfileScreen: React.FC = () => {
     firstName: '',
     lastName: '',
     username: '',
-    password: '',
+    // password: '',
     email: '',
     phone: '',
   });
@@ -66,7 +67,7 @@ const ProfileScreen: React.FC = () => {
     }
 
     try {
-      const response = await axios.post('https://your-api.com/update-profile', formData, {
+      const response = await axios.post(`${API_BASE_URL}/update-profile`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       Alert.alert('Success', 'Profile updated successfully.');
@@ -78,11 +79,27 @@ const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/bg_pattern_login.png')}
-      resizeMode="cover"
-      className="flex-1 bg-primary"
-    >
+    <View className="flex-1 bg-primary -z-10">
+      {/* Top 20% Background Dots */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 10,
+          width: '100%',
+          height: responsiveHeight(20),
+          zIndex: -1,
+        }}
+      >
+        <Image
+          source={require('../../assets/images/bg-pattern-large.png')}
+          resizeMode="cover"
+          style={{
+            width: '100%',
+            height: '100%',
+            transform: [{ scale: 1.2 }],
+          }}
+        />
+      </View>
       <SafeAreaView edges={['top']} className="flex-1">
         <KeyboardAvoidingView
           className="flex-1"
@@ -100,10 +117,10 @@ const ProfileScreen: React.FC = () => {
 
               {/* White Background Container */}
               <View
-                className="w-full px-8 py-4 bg-textLight rounded-t-3xl"
+                className="w-full px-8 py-4 flex-1 bg-textLight rounded-t-3xl"
                 // style={{ minHeight: screenHeight }}
               >
-                <Text className="font-llewie text-primary text-[4rem]">Profile</Text>
+                <Text className="font-llewie text-primary " style={{fontSize:responsiveFontSize(5.5)}}>Profile</Text>
 
                 <View className="flex flex-row items-center mt-4">
                   <CircleImage
@@ -148,7 +165,7 @@ const ProfileScreen: React.FC = () => {
                     />
                   </View>
 
-                  <View className="mb-4">
+                  {/* <View className="mb-4">
                     <Text className="font-llewie text-primary text-xl mb-1">Password</Text>
                     <TextInput
                       secureTextEntry
@@ -156,7 +173,7 @@ const ProfileScreen: React.FC = () => {
                       onChangeText={(text) => handleChange('password', text)}
                       className="bg-[#D9D9D9] px-4 py-1 rounded-lg text-xl font-llewie text-primary"
                     />
-                  </View>
+                  </View> */}
 
                   <View className="mb-4">
                     <Text className="font-llewie text-primary text-xl mb-1">Email</Text>
@@ -188,7 +205,7 @@ const ProfileScreen: React.FC = () => {
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 };
 

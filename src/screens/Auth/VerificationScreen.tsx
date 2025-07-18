@@ -8,31 +8,69 @@ import {
   ImageBackground,
   Keyboard,
   TouchableWithoutFeedback,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '../../components/Logo';
 import { RootStackParamList } from '../../types/navigation';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import useKeyboardVisible from '../../hooks/useKeyboardVisible';
+import axios from 'axios';
+import { API_BASE_URL } from '@env';
+type VerificationScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Verification'
+>;
 
-type RegisterScreenNavigationProp =
-  NativeStackNavigationProp<RootStackParamList>;
+type VerificationRouteProp = RouteProp<RootStackParamList, 'Verification'>;
 
 const VerificationScreen = () => {
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const navigation = useNavigation<VerificationScreenNavigationProp>();
+  const route = useRoute<VerificationRouteProp>();
+  const isKeyboardVisible = useKeyboardVisible();
+
+  const { email } = route.params; // ✅ Email passed from Register screen
 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleValidate = () => {
-    if (!code.trim()) {
-      setError('Code is required');
+  const handleValidate = async () => {
+    if (!code.trim() || code.length < 6) {
+      setError('Please enter a valid 6-digit code.');
       return;
     }
 
     setError('');
-    console.log('Code submitted:', code);
-    navigation.navigate('Login');
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/verify-otp`,
+        {
+          email: email, // ✅ Email from previous screen
+          otp: code,
+        }
+      );
+
+      console.log('OTP Verification Response:', response.data);
+
+      Alert.alert('Success', response.data.message || 'Verification successful!', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('Login'),
+        },
+      ]);
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.message || 'Invalid OTP. Please try again.';
+      console.log('OTP Verification Error:', err.response?.data || err.message);
+      Alert.alert('Error', errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,10 +85,7 @@ const VerificationScreen = () => {
       }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView
-          edges={['top']}
-          className="flex-1 items-center justify-center"
-        >
+        <SafeAreaView edges={['top']} className="flex-1 items-center justify-center">
           <View className="w-full h-full relative items-center">
             <Logo width={220} height={70} />
 
@@ -81,10 +116,15 @@ const VerificationScreen = () => {
                 <TouchableOpacity
                   className="bg-highlight mt-6 rounded-md w-full h-16 items-center justify-center"
                   onPress={handleValidate}
+                  disabled={loading}
                 >
-                  <Text className="text-textLight pt-1 h-12 text-4xl font-llewie text-center">
-                    Validate
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text className="text-textLight pt-1 h-12 text-4xl font-llewie text-center">
+                      Validate
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
 
@@ -100,11 +140,13 @@ const VerificationScreen = () => {
             </View>
 
             {/* Bottom Image */}
-            <Image
-              source={require('../../assets/images/character_img.png')}
-              resizeMode="contain"
-              className="w-full h-64 absolute bottom-0"
-            />
+            {!isKeyboardVisible && (
+              <Image
+                source={require('../../assets/images/character_img.png')}
+                resizeMode="contain"
+                className="w-full h-64 absolute bottom-0"
+              />
+            )}
           </View>
         </SafeAreaView>
       </TouchableWithoutFeedback>

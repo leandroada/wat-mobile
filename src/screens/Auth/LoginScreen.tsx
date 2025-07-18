@@ -8,26 +8,34 @@ import {
   ImageBackground,
   Keyboard,
   TouchableWithoutFeedback,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '../../components/Logo';
-import { useAuth } from '../../redux/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { RootStackParamList } from '../../types/navigation';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import {
+  responsiveHeight,
+  responsiveWidth,
+  responsiveFontSize,
+} from 'react-native-responsive-dimensions';
+import useKeyboardVisible from '../../hooks/useKeyboardVisible';
+import axios from 'axios';
+import { API_BASE_URL } from '@env';
 type ScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const LoginScreen = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const { login } = useAuth();
+  const isKeyboardVisible = useKeyboardVisible();
 
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({
-    emailOrUsername: '',
-    password: '',
-  });
+  const [errors, setErrors] = useState({ emailOrUsername: '', password: '' });
+  const [loading, setLoading] = useState(false); // ✅ Loading state
 
   const handleLogin = async () => {
     const newErrors = {
@@ -36,17 +44,44 @@ const LoginScreen = () => {
     };
     setErrors(newErrors);
 
-    const hasError = Object.values(newErrors).some(err => err !== '');
-    if (hasError) return;
+    if (Object.values(newErrors).some(err => err !== '')) return;
 
-    await login(); // updates global state
+    try {
+      setLoading(true); // ✅ Show loader
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/login`,
+        {
+          emailOrUsername,
+          password,
+        },
+      );
+
+      const { message, token, user } = response.data;
+      console.log('Login API Response:', response.data);
+
+      Alert.alert('Success', message);
+
+      // ✅ Save token & email in AsyncStorage
+      await login(user.username, user.id, token);
+
+      // ✅ Navigate to Home or Dashboard
+      // navigation.navigate('HomeScreen');
+    } catch (error: any) {
+      const errorMsg =
+        error.response?.data?.message ||
+        'Invalid credentials. Please try again.';
+      Alert.alert('Login Failed', errorMsg);
+      console.log('Login API Error:', error.response?.data || error.message);
+    } finally {
+      setLoading(false); // ✅ Hide loader
+    }
   };
 
   return (
     <ImageBackground
       source={require('../../assets/images/bg_login.png')}
       resizeMode="cover"
-      className="flex-1 bg-primary w-full h-full"
+      className="flex-1 bg-primary"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView
@@ -57,37 +92,59 @@ const LoginScreen = () => {
             {/* Logo */}
             <Logo width={220} height={70} />
 
-            {/* Create Account Link */}
-            <View className="flex flex-row justify-center items-center gap-2 mt-2 mb-6">
-              <Text className="text-textLight text-lg font-llewie">
+            {/* Create Account */}
+            <View className="flex-row justify-center items-center gap-2 mt-2 mb-6">
+              <Text
+                className="text-textLight font-llewie"
+                style={{ fontSize: responsiveFontSize(1.8) }}
+              >
                 Need an account?
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                <Text className="text-secondary text-lg font-llewie">
+                <Text
+                  className="text-secondary font-llewie"
+                  style={{ fontSize: responsiveFontSize(1.8) }}
+                >
                   Create an Account
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Form */}
-            <View className="w-full pt-14 px-6 flex justify-center items-center gap-7 z-10">
+            <View
+              className="w-full px-6 flex items-center gap-7 z-10"
+              style={{ paddingTop: responsiveHeight(3) }}
+            >
               {/* Email/Username */}
               <View className="w-full items-center gap-4">
-                <Text className="text-textLight mb-1 text-4xl font-llewie">
+                <Text
+                  className="text-textLight font-llewie"
+                  style={{ fontSize: responsiveFontSize(4) }}
+                >
                   Email or Username
                 </Text>
                 <TextInput
                   value={emailOrUsername}
                   onChangeText={setEmailOrUsername}
-                  placeholder={errors.emailOrUsername || 'Enter email or username'}
+                  placeholder={
+                    errors.emailOrUsername || 'Enter email or username'
+                  }
                   placeholderTextColor={errors.emailOrUsername ? 'red' : '#666'}
-                  className="bg-textLight w-[75%] h-12 rounded-md text-lg font-llewie px-4"
+                  className="bg-textLight rounded-md font-llewie text-primary px-4"
+                  style={{
+                    width: responsiveWidth(75),
+                    height: responsiveHeight(5.5),
+                    fontSize: responsiveFontSize(1.8),
+                  }}
                 />
               </View>
 
               {/* Password */}
-              <View className="w-full items-center gap-2">
-                <Text className="text-textLight mb-1 text-4xl font-llewie">
+              <View className="w-full items-center gap-4">
+                <Text
+                  className="text-textLight font-llewie"
+                  style={{ fontSize: responsiveFontSize(4) }}
+                >
                   Password
                 </Text>
                 <TextInput
@@ -96,49 +153,50 @@ const LoginScreen = () => {
                   placeholder={errors.password || 'Enter password'}
                   placeholderTextColor={errors.password ? 'red' : '#666'}
                   secureTextEntry
-                  className="bg-textLight w-[75%] h-12 rounded-md text-lg font-llewie px-4"
+                  className="bg-textLight rounded-md font-llewie px-4 text-textDark"
+                  style={{
+                    width: responsiveWidth(75),
+                    height: responsiveHeight(5.5),
+                    fontSize: responsiveFontSize(1.8),
+                  }}
                 />
               </View>
 
-              {/* Submit */}
-              <View className="w-full px-4 items-center mt-2">
+              {/* Login Button */}
+              <View className="w-full items-center mt-2">
                 <TouchableOpacity
-                  className="bg-highlight mt-6 rounded-md w-full h-16 items-center justify-center"
+                  className="bg-highlight rounded-md items-center justify-center"
+                  style={{
+                    width: responsiveWidth(80),
+                    height: responsiveHeight(7),
+                    marginTop: responsiveHeight(2),
+                  }}
                   onPress={handleLogin}
+                  disabled={loading} // ✅ Disable button when loading
                 >
-                  <Text className="text-textLight pt-1 h-12 text-4xl font-llewie text-center">
-                    Login
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text
+                      className="text-textLight font-llewie text-center"
+                      style={{ fontSize: responsiveFontSize(3.5) }}
+                    >
+                      Login
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
 
-            {/* Forgot */}
-            <View className="flex justify-center items-center mt-12 gap-2">
-              <View className="flex flex-row justify-center items-center gap-2">
-                <Text className="text-textLight text-md font-llewie">
-                  Forgot Username?
-                </Text>
-                <Text className="text-secondary text-md font-llewie">
-                  Get Help
-                </Text>
-              </View>
-              <View className="flex flex-row justify-center items-center gap-2">
-                <Text className="text-textLight text-md font-llewie">
-                  Forgot Password?
-                </Text>
-                <Text className="text-secondary text-md font-llewie">
-                  Get Help
-                </Text>
-              </View>
-            </View>
-
-            {/* Bottom Image */}
-            <Image
-              source={require('../../assets/images/character_img.png')}
-              resizeMode="contain"
-              className="w-full h-64 absolute bottom-0"
-            />
+            {/* Bottom Character Image */}
+            {!isKeyboardVisible && (
+              <Image
+                source={require('../../assets/images/character_img.png')}
+                resizeMode="contain"
+                className="absolute bottom-0 z-0"
+                style={{ width: '100%', height: responsiveWidth(55) }}
+              />
+            )}
           </View>
         </SafeAreaView>
       </TouchableWithoutFeedback>

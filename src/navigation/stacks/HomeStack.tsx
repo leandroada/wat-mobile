@@ -6,6 +6,7 @@ import GameSelectionScreen from '../../screens/Game/GameSelectionScreen';
 import CharacterScreen from '../../screens/Game/CharacterScreen';
 import GameIntroScreen from '../../screens/Game/GameIntroScreen';
 import MyFriendsScreen from '../../screens/Home/MyFriendsScreen';
+import GameScreen from '../../screens/Game/GameScreen';
 const Stack = createNativeStackNavigator();
 
 const HomeStack = () => {
@@ -16,6 +17,7 @@ const HomeStack = () => {
       <Stack.Screen name="MyFriends" component={MyFriendsScreen}  />
       <Stack.Screen name="GameSelection"  component={GameSelectionScreen} />
       <Stack.Screen name="CharacterScreen" component={CharacterScreen} />
+      <Stack.Screen name="GameScreen" component={GameScreen} />
       <Stack.Screen name="GameIntroScreen"    options={{
       animation: 'fade', // ✅ Apply fade-in only to this screen
       presentation: 'card', // or 'modal' if you prefer

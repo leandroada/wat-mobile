@@ -12,7 +12,10 @@ const StackNavigation = () => {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
+      <Stack.Screen name="Splash" component={SplashScreen}  options={{
+      animation: 'fade', 
+      headerShown: false,
+    }}/>
       <Stack.Screen name="Start" component={StartScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Verification" component={VerificationScreen} />

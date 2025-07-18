@@ -1,7 +1,7 @@
 export type RootStackParamList = {
   Register: undefined;
   Login: undefined;
-  Verification: undefined;
+  Verification: { userId: string , email : string };
   Start: undefined;
   Setting: undefined;
   General: undefined;
@@ -15,5 +15,7 @@ export type RootStackParamList = {
   GameSelection : undefined;
   CharacterScreen: undefined;
   GameIntroScreen: undefined;
-  MyFriends:undefined
+  MyFriends:undefined;
+  GameScreen:undefined
+  playtutorial:undefined
 };

@@ -1,37 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import CustomHeader from '../../components/CustomHeader';
+import {
+  responsiveFontSize,
+  responsiveHeight,
+  responsiveWidth,
+} from 'react-native-responsive-dimensions';
 
-type RegisterScreenNavigationProp =
+const { height: screenHeight } = Dimensions.get('window');
+
+type ScreenNavigationProp =
   NativeStackNavigationProp<RootStackParamList>;
 
 const GameSelectionScreen = () => {
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const navigation = useNavigation<ScreenNavigationProp>();
 
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     'Beginner' | 'Advanced' | null
   >(null);
-
   const [selectedTestament, setSelectedTestament] = useState<
     'New Testament' | 'Old Testament' | null
   >(null);
-
   const [selectedOpponent, setSelectedOpponent] = useState<
     'Computer' | 'Play Online' | null
   >(null);
 
   const handleStartGame = () => {
-    console.log({
-      difficulty: selectedDifficulty,
-      testament: selectedTestament,
-      opponent: selectedOpponent,
-    });
-
-    // You can navigate with selections here:
     navigation.navigate('CharacterScreen');
   };
 
@@ -47,16 +52,18 @@ const GameSelectionScreen = () => {
       }`}
     >
       <Text
-        className={`text-xl font-llewie ${
-          isSelected ? 'text-black' : 'text-white'
-        }`}
+        className={`font-llewie ${isSelected ? 'text-black' : 'text-white'}`}
+        style={{ fontSize: responsiveFontSize(2.1) }}
       >
         {label}
       </Text>
 
       {isSelected && (
         <View className="w-5 h-5 bg-greenOn rounded-full absolute -top-2 -right-2 items-center justify-center overflow-visible">
-          <Text className="text-white text-xl leading-none ml-1 -mt-[5px]">
+          <Text
+            className="text-white font-bold"
+            style={{ fontSize: responsiveFontSize(1.5), marginTop: -2 }}
+          >
             ✓
           </Text>
         </View>
@@ -71,19 +78,30 @@ const GameSelectionScreen = () => {
       className="flex-1 bg-primary"
     >
       <SafeAreaView edges={['top']} className="flex-1">
-        <View className="w-full">
-          <View className="mb-6 items-center">
-            <CustomHeader />
-          </View>
-
-          <View className="h-full flex items-center gap-4 justify-start px-5">
-            <Text className="text-white text-4xl font-llewie">
+        <View className="mb-6 items-center">
+          <CustomHeader />
+        </View>
+        <ScrollView
+          contentContainerStyle={{
+            paddingBottom: responsiveHeight(2),
+            paddingHorizontal: responsiveWidth(4),
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="flex items-center  justify-start" style={{gap : responsiveHeight(1)}}>
+            <Text
+              className="text-white  font-llewie"
+              style={{ fontSize: responsiveFontSize(4) }}
+            >
               Choose your Game
             </Text>
 
             {/* Difficulty */}
             <View className="border-4 border-secondary rounded-xl p-4 mt-4 pb-6 w-full">
-              <Text className="text-white text-2xl font-llewie">
+              <Text
+                className="text-white font-llewie"
+                style={{ fontSize: responsiveFontSize(2.6) }}
+              >
                 Difficulty
               </Text>
               <View className="flex flex-row justify-between mt-3">
@@ -102,7 +120,12 @@ const GameSelectionScreen = () => {
 
             {/* Testament */}
             <View className="border-4 border-secondary rounded-xl p-4 mt-4 pb-6 w-full">
-              <Text className="text-white text-2xl font-llewie">Testament</Text>
+              <Text
+                className="text-white font-llewie"
+                style={{ fontSize: responsiveFontSize(2.6) }}
+              >
+                Testament
+              </Text>
               <View className="flex flex-row justify-between mt-3">
                 {renderOption(
                   'New Testament',
@@ -119,7 +142,12 @@ const GameSelectionScreen = () => {
 
             {/* Opponent */}
             <View className="border-4 border-secondary rounded-xl p-4 mt-4 pb-6 w-full">
-              <Text className="text-white text-2xl font-llewie">Opponent</Text>
+              <Text
+                className="text-white font-llewie"
+                style={{ fontSize: responsiveFontSize(2.6) }}
+              >
+                Opponent
+              </Text>
               <View className="flex flex-row justify-between mt-3">
                 {renderOption('Computer', selectedOpponent === 'Computer', () =>
                   setSelectedOpponent('Computer'),
@@ -136,15 +164,21 @@ const GameSelectionScreen = () => {
             <View className="mt-4 items-center w-full">
               <TouchableOpacity
                 onPress={handleStartGame}
-                className="bg-secondary rounded-lg w-full h-[4.5rem] my-4 items-center justify-center"
+                className="bg-secondary rounded-lg w-full items-center justify-center my-4"
+                style={{
+                  height: responsiveHeight(screenHeight > 700 ? 6.5 : 7.2),
+                }}
               >
-                <Text className="text-primary text-3xl font-llewie">
+                <Text
+                  className="text-primary font-llewie"
+                  style={{ fontSize: responsiveFontSize(3) }}
+                >
                   Start Game
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </ImageBackground>
   );

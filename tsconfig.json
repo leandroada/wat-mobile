@@ -1,3 +1,21 @@
 {
-  "extends": "@react-native/typescript-config"
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "typeRoots": [
+      "./node_modules/@types",
+      "./@types"
+    ],
+    "types": [
+      "react",
+      "react-native"
+    ]
+  },
+  "include": [
+    "src",
+    "@types",
+    "index.js",
+    "index.ts",
+    "index.tsx",
+    "nativewind-env.d.ts"
+  ]
 }

@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import { responsiveFontSize, responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
+import { Image } from 'react-native';
 
 const PrivacyScreen = () => {
   const [profileVisibility, setProfileVisibility] = useState<
@@ -30,20 +32,34 @@ const PrivacyScreen = () => {
   const analyticsOptions: ('Opt-In' | 'Opt-Out')[] = ['Opt-In', 'Opt-Out'];
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/bg_pattern_login.png')}
-      resizeMode="cover"
-      className="flex-1 bg-primary"
-    >
+    <View className="flex-1 bg-primary -z-10">
+      {/* Top 20% Background Dots */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 10,
+          width: '100%',
+          height: responsiveHeight(20),
+          zIndex: -1,
+        }}
+      >
+        <Image
+          source={require('../../assets/images/bg-pattern-large.png')}
+          resizeMode="cover"
+          style={{
+            width: '100%',
+            height: '100%',
+            transform: [{ scale: 1.2 }],
+          }}
+        />
+      </View>
       <SafeAreaView edges={['top']} className="flex-1">
         <ScrollView
           contentContainerStyle={{
-            paddingTop: 16,
-            paddingBottom: 5,
+            paddingBottom: 40,
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          scrollEnabled={true}
         >
           <View className="w-full">
             {/* Header */}
@@ -52,14 +68,20 @@ const PrivacyScreen = () => {
             </View>
 
             {/* Content */}
-            <View className="w-full h-full px-12 py-8 bg-textLight">
-              <Text className="font-llewie text-primary pr-9  h-48 text-6xl mb-5">
-                Privacy and Security
+            <View className="w-full  py-8 bg-textLight rounded-t-3xl h-full" style={{paddingHorizontal:responsiveWidth(8)}}>
+              <Text
+                className="font-llewie text-primary mb-5"
+                style={{ fontSize: responsiveFontSize(5) }}
+              >
+                Privacy & Security
               </Text>
 
               {/* Profile Visibility */}
               <View className="mb-10">
-                <Text className="font-llewie text-primary text-4xl mb-4">
+                <Text
+                  className="font-llewie text-primary mb-4"
+                  style={{ fontSize: responsiveFontSize(3.5) }}
+                >
                   Profile Visibility
                 </Text>
                 <View className="flex-row justify-between">
@@ -73,13 +95,16 @@ const PrivacyScreen = () => {
                         key={option}
                         onPress={() => setProfileVisibility(option)}
                         className={[
-                          'flex-1 py-1 items-center',
+                          'flex-1 py-2 items-center',
                           isSelected ? 'bg-primary' : 'bg-secondary',
                           isFirst ? 'rounded-l-lg' : '',
                           isLast ? 'rounded-r-lg' : '',
                         ].join(' ')}
                       >
-                        <Text className="font-llewie text-2xl text-white">
+                        <Text
+                          className="font-llewie text-white"
+                          style={{ fontSize: responsiveFontSize(2.2) }}
+                        >
                           {option}
                         </Text>
                       </TouchableOpacity>
@@ -88,9 +113,12 @@ const PrivacyScreen = () => {
                 </View>
               </View>
 
-              {/* Analytics & Crash Reports */}
+              {/* Analytics */}
               <View className="mb-10">
-                <Text className="font-llewie text-primary text-4xl mb-4">
+                <Text
+                  className="font-llewie text-primary mb-4"
+                  style={{ fontSize: responsiveFontSize(3.5) }}
+                >
                   Analytics & Crash Reports Opt-In
                 </Text>
                 <View className="flex-row justify-between">
@@ -104,13 +132,16 @@ const PrivacyScreen = () => {
                         key={option}
                         onPress={() => setAnalyticsOptIn(option)}
                         className={[
-                          'flex-1 py-1 items-center',
+                          'flex-1 py-2 items-center',
                           isSelected ? 'bg-primary' : 'bg-secondary',
                           isFirst ? 'rounded-l-lg' : '',
                           isLast ? 'rounded-r-lg' : '',
                         ].join(' ')}
                       >
-                        <Text className="font-llewie text-2xl text-white">
+                        <Text
+                          className="font-llewie text-white"
+                          style={{ fontSize: responsiveFontSize(2.2) }}
+                        >
                           {option}
                         </Text>
                       </TouchableOpacity>
@@ -119,33 +150,47 @@ const PrivacyScreen = () => {
                 </View>
               </View>
 
-              {/* Change Password / Set Passcode */}
-              <View className="mb-4">
-                <Text className="font-llewie text-primary text-4xl mb-4">
+              {/* Password */}
+              <View className="mb-6">
+                <Text
+                  className="font-llewie text-primary mb-2"
+                  style={{ fontSize: responsiveFontSize(3.5) }}
+                >
                   Change Password / Set Passcode
                 </Text>
-                <Text className="font-llewie text-primary text-2xl mb-1">
+                <Text
+                  className="font-llewie text-primary mb-1"
+                  style={{ fontSize: responsiveFontSize(2.0) }}
+                >
                   New Password
                 </Text>
                 <TextInput
                   placeholder="New Password"
-                  placeholderTextColor="#999"
+                  placeholderTextColor="#D9D9D9"
                   secureTextEntry
                   value={password}
                   onChangeText={setPassword}
-                  className="bg-[#D9D9D9] px-4 py-2 rounded-lg text-xl font-llewie text-primary"
+                  className="bg-[#D9D9D9] px-4 py-2 rounded-lg font-llewie text-primary"
+                  style={{
+                    fontSize: responsiveFontSize(2),
+                  }}
                 />
               </View>
 
               {/* Reset Button */}
-              <TouchableOpacity className="bg-secondary py-3 mx-8  rounded-xl items-center">
-                <Text className="font-llewie text-textLight text-2xl">Reset</Text>
+              <TouchableOpacity className="bg-secondary py-3 rounded-xl items-center" style={{ marginHorizontal: responsiveWidth(12)}}>
+                <Text
+                  className="font-llewie text-textLight"
+                  style={{ fontSize: responsiveFontSize(2.4) }}
+                >
+                  Reset
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 };
 

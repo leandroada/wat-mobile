@@ -10,8 +10,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import SpeechBubble from '../../components/SpeechBubble';
+import { RootStackParamList } from '../../types/navigation';
+
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+type RegisterScreenNavigationProp =
+  NativeStackNavigationProp<RootStackParamList>;
+  
 
 const GameIntroScreen = () => {
+    const navigation = useNavigation<RegisterScreenNavigationProp>();
   return (
     <ImageBackground
       source={require('../../assets/images/bg_pattern_login.png')}
@@ -43,7 +51,7 @@ const GameIntroScreen = () => {
                 className="w-80 h-80 -ml-20 "
                 resizeMode="contain"
               />
-              <TouchableOpacity className='bg-highlight mt-48 h-16 w-48 -mr-10 flex justify-center rounded-l-full '>
+              <TouchableOpacity onPress={()=> navigation.navigate("GameScreen")} className='bg-highlight mt-48 h-16 w-48 -mr-10 flex justify-center rounded-l-full '>
                 <Text className="text-white text-4xl font-llewie text-start pl-8">
                   Skip
                 </Text>
