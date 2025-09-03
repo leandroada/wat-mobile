@@ -274,12 +274,12 @@ const HomeScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
-            <View className=' relative -z-20' style={{ width: '100%', height: responsiveWidth(27) }}>
+            <View className=' relative -z-20' style={{ width: '100%', height: responsiveWidth(29) }}>
               <Image
                 source={require('../../assets/images/character_home_img.png')}
                 resizeMode="contain"
                 className=" -z-10 absolute -bottom-3 "
-                style={{ width: '100%', height: responsiveWidth(42) }}
+                style={{ width: '100%', height: responsiveWidth(43) }}
               />
               
             </View>
