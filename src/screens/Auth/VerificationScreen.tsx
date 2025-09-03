@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import useKeyboardVisible from '../../hooks/useKeyboardVisible';
 import axios from 'axios';
 import { API_BASE_URL } from '@env';
+import { useToast } from 'react-native-toast-notifications';
+
 type VerificationScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Verification'
@@ -30,16 +32,52 @@ const VerificationScreen = () => {
   const navigation = useNavigation<VerificationScreenNavigationProp>();
   const route = useRoute<VerificationRouteProp>();
   const isKeyboardVisible = useKeyboardVisible();
+  const toast = useToast();
 
   const { email } = route.params; // ✅ Email passed from Register screen
 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resend, setResend] = useState(false);
+  const [timer, setTimer] = useState(0);
+
+  const handleResend = async () => {
+    if (resend) return; // prevent double clicks
+    setResend(true);
+    setTimer(9); // disable for 10 seconds
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/resend-otp`, {
+        email: email,
+      });
+      toast.show(response.data.message || 'OTP resent successfully!', {
+        type: 'success',
+      });
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || 'Failed to resend OTP.';
+      console.log('Resend OTP Error:', err.response?.data || err.message);
+      toast.show(errorMsg, { type: 'danger' });
+    }
+  };
+
+  // countdown effect
+  useEffect(() => {
+    let interval: any;
+    if (resend && timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1);
+      }, 1000);
+    } else if (timer === 0 && resend) {
+      setResend(false); // enable button again
+    }
+    return () => clearInterval(interval);
+  }, [resend, timer]);
 
   const handleValidate = async () => {
     if (!code.trim() || code.length < 6) {
       setError('Please enter a valid 6-digit code.');
+      toast.show('Please enter a valid 6-digit code.', { type: 'danger' });
       return;
     }
 
@@ -47,27 +85,23 @@ const VerificationScreen = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/verify-otp`,
-        {
-          email: email, // ✅ Email from previous screen
-          otp: code,
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/api/auth/verify-otp`, {
+        email: email, // ✅ Email from previous screen
+        otp: code,
+      });
 
       console.log('OTP Verification Response:', response.data);
 
-      Alert.alert('Success', response.data.message || 'Verification successful!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]);
+      toast.show(response.data.message || 'Verification successful!', {
+        type: 'success',
+      });
+
+      navigation.navigate('Login');
     } catch (err: any) {
       const errorMsg =
         err.response?.data?.message || 'Invalid OTP. Please try again.';
       console.log('OTP Verification Error:', err.response?.data || err.message);
-      Alert.alert('Error', errorMsg);
+      toast.show(errorMsg, { type: 'danger' });
     } finally {
       setLoading(false);
     }
@@ -85,7 +119,10 @@ const VerificationScreen = () => {
       }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView edges={['top']} className="flex-1 items-center justify-center">
+        <SafeAreaView
+          edges={['top']}
+          className="flex-1 items-center justify-center"
+        >
           <View className="w-full h-full relative items-center">
             <Logo width={220} height={70} />
 
@@ -103,9 +140,9 @@ const VerificationScreen = () => {
                 <TextInput
                   value={code}
                   onChangeText={setCode}
-                  placeholder={error ? error : '123456'}
-                  placeholderTextColor={error ? 'red' : '#999'}
-                  className="bg-textLight w-full h-14 rounded-md text-lg font-llewie px-4"
+                  // placeholder={error ? error : '123456'}
+                  // placeholderTextColor={error ? 'red' : '#999'}
+                  className="bg-textLight w-full h-14 text-primary rounded-md text-lg font-llewie px-4"
                   keyboardType="number-pad"
                   maxLength={6}
                 />
@@ -133,10 +170,23 @@ const VerificationScreen = () => {
                 <Text className="text-textLight text-md font-llewie">
                   Didn't receive a code?
                 </Text>
-                <Text className="text-secondary text-md font-llewie">
-                  Get Help
-                </Text>
+                <TouchableOpacity disabled={resend} onPress={handleResend}>
+                  <Text
+                    className={`${
+                      resend ? 'text-gray-400' : 'text-secondary'
+                    }  text-md font-llewie`}
+                  >
+                    Resend
+                  </Text>
+                </TouchableOpacity>
               </View>
+              {resend && (
+                <View className="flex flex-row justify-center items-center gap-2">
+                  <Text className="text-textLight text-md font-llewie">
+                    00:0{timer}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Bottom Image */}

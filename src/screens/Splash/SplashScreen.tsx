@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Animated,
@@ -19,10 +19,11 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 const SplashScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
-  // Animated values
+  const [displayedText, setDisplayedText] = useState('');
+  const tagline = "Get to know scripture.\nOne puzzle at a time.";
+
   const screenOpacity = useRef(new Animated.Value(0)).current;
   const logoOpacity = useRef(new Animated.Value(1)).current;
-  const textOpacity = useRef(new Animated.Value(0)).current;
   const imageOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -39,24 +40,26 @@ const SplashScreen: React.FC = () => {
         delay: 1000,
         useNativeDriver: true,
       }).start(() => {
-        // Fade in text and image together
-        Animated.parallel([
-          Animated.timing(textOpacity, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(imageOpacity, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          // Navigate after delay
-          setTimeout(() => {
-            navigation.navigate('Start'); 
-          }, 2000);
-        });
+        // Start typing effect for tagline
+        let i = 0;
+        const interval = setInterval(() => {
+          setDisplayedText((prev) => prev + tagline[i]);
+          i++;
+          if (i === tagline.length) {
+            clearInterval(interval);
+            // After tagline complete, fade in image
+            Animated.timing(imageOpacity, {
+              toValue: 1,
+              duration: 800,
+              useNativeDriver: true,
+            }).start(() => {
+              // Navigate after delay
+              setTimeout(() => {
+                navigation.replace('Start');
+              }, 2000);
+            });
+          }
+        }, 80); // typing speed (80ms per char)
       });
     });
   }, []);
@@ -72,16 +75,19 @@ const SplashScreen: React.FC = () => {
           {/* Container for both elements */}
           <View style={styles.centerContent}>
             {/* Logo */}
-            <Animated.View style={[styles.logoWrapper, { opacity: logoOpacity }]}>
+            {/* <Animated.View style={[styles.logoWrapper, { opacity: logoOpacity }]}> */}
+            <View className="mb-[29rem]">
               <LogoStart width={responsiveWidth(80)} height={responsiveHeight(10)} />
-            </Animated.View>
 
-            {/* Tagline  */}
-            <Animated.View style={[styles.textWrapper, { opacity: textOpacity }]}>
+            </View>
+            {/* </Animated.View> */}
+
+            {/* Typing Tagline */}
+            <View style={styles.textWrapper}>
               <Text className="font-llewie text-textLight text-center text-3xl">
-                {"Get to know scripture.\nOne puzzle at a time."}
+                {displayedText}
               </Text>
-            </Animated.View>
+            </View>
           </View>
 
           {/* Bottom image */}
@@ -114,16 +120,17 @@ const styles = StyleSheet.create({
   },
   logoWrapper: {
     position: 'absolute',
-    top: responsiveHeight(5), 
+    top: responsiveHeight(5),
   },
   textWrapper: {
     position: 'absolute',
-    top: 0, 
+    top: 0,
   },
   bottomImage: {
     position: 'absolute',
     bottom: 0,
     width: responsiveWidth(100),
     height: responsiveWidth(100),
+    zIndex: -1,
   },
 });

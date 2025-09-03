@@ -13,7 +13,7 @@ import PlayAndTutorialScreen from '../../screens/Setting/PlayAndTutorialScreen';
 const Stack = createNativeStackNavigator();
 const SettingStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false ,animation: 'slide_from_right'  }}>
       <Stack.Screen name="SettingScreen" component={SettingScreen}  />
       <Stack.Screen name="About" component={AboutScreen} />
       <Stack.Screen name="Audio" component={AudioScreen} />

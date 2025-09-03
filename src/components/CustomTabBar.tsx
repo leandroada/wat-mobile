@@ -1,24 +1,52 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { CommonActions, StackActions } from '@react-navigation/native';
 import HomeIcon from '../assets/icons/Home';
 import SettingIcon from '../assets/icons/SettingIcon';
-import InfoIcon from '../assets/icons/InfoIcon';
+import NotificationIcon from '../assets/icons/NotificationIcon';
 import AudioIcon from '../assets/icons/AudioIcon';
-import { responsiveFontSize, responsiveHeight } from 'react-native-responsive-dimensions';
+import {
+  responsiveFontSize,
+  responsiveHeight,
+} from 'react-native-responsive-dimensions';
 
-const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+const CustomTabBar: React.FC<BottomTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
   return (
     <View
       className="flex-row bg-highlight"
-      style={{ height: responsiveHeight(11.5) }} // around 95 on large screens
+      style={{ height: responsiveHeight(11.5) }}
     >
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
         const { options } = descriptors[route.key];
 
         const onPress = () => {
+          // Always navigate first
           navigation.navigate(route.name);
+
+          const subState = state.routes[index].state as
+            | { key: string; type: string }
+            | undefined;
+
+          // Then reset the stack immediately
+          if (subState?.type === 'stack') {
+            navigation.dispatch({
+              ...StackActions.popToTop(),
+              target: subState.key,
+            });
+          } else {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: route.name }],
+              }),
+            );
+          }
         };
 
         let IconComponent;
@@ -29,8 +57,8 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
           case 'Setting':
             IconComponent = SettingIcon;
             break;
-          case 'Info':
-            IconComponent = InfoIcon;
+          case 'Notification':
+            IconComponent = NotificationIcon;
             break;
           case 'Audio':
             IconComponent = AudioIcon;
@@ -53,7 +81,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
             }}
           >
             <IconComponent
-              width={responsiveFontSize(4.7)} // adjusts on smaller screens
+              width={responsiveFontSize(4.7)}
               height={responsiveFontSize(4.7)}
               color={isFocused ? '#FFB949' : 'white'}
             />

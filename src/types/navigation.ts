@@ -1,5 +1,6 @@
 export type RootStackParamList = {
   Register: undefined;
+  HomeScreen: undefined; // ← add this
   Login: undefined;
   Verification: { userId: string , email : string };
   Start: undefined;

@@ -1,58 +1,116 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ImageBackground,
   FlatList,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Logo from '../../components/Logo';
-import CircleImage from '../../components/CircleImage';
 import CustomHeader from '../../components/CustomHeader';
-import { RootStackParamList } from '../../types/navigation';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import ArrowRight from '../../assets/icons/ArrowRight';
 import FriendCard from '../../components/FriendCard';
-import CrownIcon from '../../assets/icons/CrownIcon';
+import ArrowRight from '../../assets/icons/ArrowRight';
 import {
   responsiveFontSize,
-  responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import { useUser } from '../../context/UserContext';
+import { API_BASE_URL } from '@env';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/navigation';
 
-type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type ScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type UserData = {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  status: 'online' | 'offline';
+  isOnline: boolean;
+  globalRank?: number;
+};
 
 const MyFriendsScreen = () => {
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
-  const [friendsData, setFriendsData] = useState<'My Friends' | 'Online'>('My Friends');
+  const navigation = useNavigation<ScreenNavigationProp>();
+  const [friendsData, setFriendsData] = useState<'My Friends' | 'Online'>(
+    'My Friends',
+  );
   const [searchId, setSearchId] = useState('');
   const FriendsOptions: ('My Friends' | 'Online')[] = ['My Friends', 'Online'];
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
+  const { user } = useUser();
 
-  const friendData = [
-    { Rank: 101, Id: 'AL_01', Online: true, image: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { Rank: 204, Id: 'BZ_42', Online: false, image: 'https://randomuser.me/api/portraits/women/5.jpg' },
-    { Rank: 325, Id: 'CT_88', Online: true, image: 'https://randomuser.me/api/portraits/men/8.jpg' },
-    { Rank: 112, Id: 'DK_23', Online: false, image: 'https://randomuser.me/api/portraits/women/9.jpg' },
-    { Rank: 430, Id: 'EZ_77', Online: true, image: 'https://randomuser.me/api/portraits/men/12.jpg' },
-    { Rank: 157, Id: 'FG_19', Online: true, image: 'https://randomuser.me/api/portraits/women/14.jpg' },
-    { Rank: 198, Id: 'HY_66', Online: false, image: 'https://randomuser.me/api/portraits/men/15.jpg' },
-    { Rank: 263, Id: 'JK_35', Online: true, image: 'https://randomuser.me/api/portraits/women/18.jpg' },
-    { Rank: 341, Id: 'LM_04', Online: false, image: 'https://randomuser.me/api/portraits/men/20.jpg' },
-    { Rank: 390, Id: 'NO_90', Online: true, image: 'https://randomuser.me/api/portraits/women/22.jpg' },
-  ];
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const filteredFriends = friendData.filter(friend => {
-    if (searchId.trim() !== '') {
-      return friend.Id.toLowerCase().includes(searchId.toLowerCase());
-    } else if (friendsData === 'Online') {
-      return friend.Online;
+      let endpoint = `${API_BASE_URL}/api/friends/list`;
+      if (friendsData === 'Online') {
+        endpoint = `${API_BASE_URL}/api/users?status=online&page=1&limit=50`;
+      }
+
+      if (searchId.trim() !== '') {
+        endpoint = `${API_BASE_URL}/api/users/search?query=${searchId}&page=1&limit=20`;
+      }
+
+      const res = await axios.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Normalize response data
+      const rawUsers = res.data.data?.users || res.data.data?.friends || [];
+
+      // Filter out current user
+      const filteredUsers = rawUsers.filter((u: any) => u.id !== user?.id);
+
+      setUsers(filteredUsers);
+      console.log(filteredUsers, endpoint);
+    } catch (err: any) {
+      console.log(err);
+      setError('Failed to load users');
+    } finally {
+      setLoading(false);
     }
-    return true;
-  });
+  };
+
+  const HandleRequest = async (userId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await axios.post(
+        `${API_BASE_URL}/api/friends/request`,
+        { recipientId: userId }, // body
+        {
+          headers: { Authorization: `Bearer ${token}` }, // config
+        },
+      );
+
+      console.log(res.data, 'friend request sended', userId);
+      // fetchUsers();
+    } catch (err: any) {
+      console.log(err);
+      setError('Failed to send friend request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [friendsData, searchId]);
 
   return (
     <ImageBackground
@@ -69,61 +127,36 @@ const MyFriendsScreen = () => {
 
           {/* User Card */}
           <View className="px-8 relative py-4 mb-2">
-                        {/* User Card */}
-            <View className=" py-4 mb-2">
-              <View className="flex flex-row w-full gap-7 justify-between items-center mb-4">
-                <View className="flex flex-row items-center gap-2">
-                  <CircleImage
-                    image="https://randomuser.me/api/portraits/men/32.jpg"
-                    size={responsiveWidth(15)}
-                  />
-                  <View>
-                    <Text
-                      className="text-white font-llewie"
-                      style={{ fontSize: responsiveFontSize(2) }}
-                    >
-                      RANK #234
-                    </Text>
-                    <Text
-                      className="text-white font-llewie"
-                      style={{ fontSize: responsiveFontSize(3) }}
-                    >
-                      AL_25
-                    </Text>
-                  </View>
-                </View>
-                <View className="items-center justify-center ">
-                  <Text
-                    className="text-white font-llewie"
-                    style={{
-                      letterSpacing: 5,
-                      fontSize: responsiveFontSize(1.7),
-                    }}
-                  >
-                    POINTS:300
-                  </Text>
-                  <View className="flex-row justify-center items-end" style={{marginTop:responsiveWidth(-1)}}>
-                    <CrownIcon width={responsiveWidth(7.5)} height={responsiveWidth(7.5)} />
-                    <CrownIcon width={responsiveWidth(8)} height={responsiveWidth(8)} />
-                    <CrownIcon width={responsiveWidth(8.5)} height={responsiveWidth(8.5)} />
-                    <CrownIcon width={responsiveWidth(9)} height={responsiveWidth(9)} />
-                  </View>
-                </View>
-              </View>
+            <View className="py-6 mb-10 flex items-center justify-center">
+              <Text
+                className="text-white font-llewie"
+                style={{ fontSize: responsiveFontSize(4) }}
+              >
+                Players Pool
+              </Text>
             </View>
 
             {/* Search */}
-            <View className="absolute top-32 left-8 border-4 w-full border-primary rounded-xl z-10 bg-white flex flex-row">
+            <View
+              className="absolute left-8 border-4 h-[4.5rem] w-full border-primary rounded-xl z-10 bg-white flex flex-row"
+              style={{ bottom: -responsiveWidth(9) }}
+            >
               <TextInput
-                placeholder="Search For Friends"
+                placeholder={
+                  friendsData === 'My Friends'
+                    ? 'Search for a friend to play'
+                    : 'Search for a player available online'
+                }
                 placeholderTextColor="#2330665C"
                 value={searchId}
                 onChangeText={setSearchId}
-                className="bg-textLight py-4 w-[85%] px-4 rounded-lg text-lg font-llewie text-primary"
+                className="bg-textLight py-4 w-[85%] px-4 rounded-lg  font-llewie text-primary"
+                style={{ fontSize: responsiveFontSize(1.5) }}
+                onSubmitEditing={fetchUsers}
               />
               <TouchableOpacity
                 className="bg-[#D9D9D9] flex justify-center items-center rounded-r-lg w-[15%]"
-                onPress={() => {}}
+                onPress={fetchUsers}
               >
                 <ArrowRight width={40} height={40} color="#000" />
               </TouchableOpacity>
@@ -134,47 +167,60 @@ const MyFriendsScreen = () => {
           <View className="flex-1 py-8 px-4 bg-textLight">
             {/* Options */}
             <View className="mb-4 px-2">
-              <View className="flex-row mt-8 justify-between">
+              <View className="flex-row mt-8 justify-between bg-secondary">
                 {FriendsOptions.map(option => {
                   const isSelected = friendsData === option;
-                  const isFirst = option === 'My Friends';
-                  const isLast = option === 'Online';
-
                   return (
                     <TouchableOpacity
                       key={option}
                       onPress={() => setFriendsData(option)}
-                      className={[
-                        'flex-1 py-2 items-center',
-                        isSelected ? 'bg-highlight' : 'bg-secondary',
-                        isFirst ? 'rounded-l-lg' : '',
-                        isLast ? 'rounded-r-lg' : '',
-                      ].join(' ')}
+                      className={`flex-1 py-2 items-center ${
+                        isSelected ? 'bg-highlight rounded-2xl' : 'bg-secondary'
+                      }`}
                     >
-                      <Text className="font-llewie text-2xl text-white">{option}</Text>
+                      <Text className="font-llewie text-2xl text-white">
+                        {option}
+                      </Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
             </View>
 
-            {/* Friend List */}
-            <View className="flex-1">
-              <FlatList
-                data={filteredFriends}
-                keyExtractor={(item, index) => item.Id + index}
-                renderItem={({ item }) => (
-                  <FriendCard
-                    Rank={item.Rank}
-                    Id={item.Id}
-                    Online={item.Online}
-                    image={item.image}
-                    friendsData={friendsData}
-                  />
-                )}
-                contentContainerStyle={{ padding: 10 }}
-                ItemSeparatorComponent={() => <View className="h-3" />}
-              />
+            {/* List */}
+            <View className="flex-1 -mb-10">
+              {loading ? (
+                <ActivityIndicator size="large" color="#000" />
+              ) : error ? (
+                <Text className="text-red-500 text-center">{error}</Text>
+              ) : users.length === 0 ? (
+                <View className="flex-1 justify-start mt-10 items-center">
+                  <Text className="text-primary font-llewie">
+                    No users found
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={users}
+                  keyExtractor={item => item.id}
+                  renderItem={({ item }) => (
+                    <FriendCard
+                      Rank={item.globalRank || 0}
+                      Id={item.id}
+                      Online={item.isOnline}
+                      Username={item.username}
+                      image={
+                        item.avatar ||
+                        'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png'
+                      }
+                      friendsData={friendsData}
+                      handleRequest={HandleRequest}
+                    />
+                  )}
+                  contentContainerStyle={{ padding: 10 }}
+                  ItemSeparatorComponent={() => <View className="h-3" />}
+                />
+              )}
             </View>
           </View>
         </View>

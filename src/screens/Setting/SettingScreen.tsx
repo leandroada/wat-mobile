@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -20,14 +20,38 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import { useUser } from '../../context/UserContext';
 
-type RegisterScreenNavigationProp =
+type ScreenNavigationProp =
   NativeStackNavigationProp<RootStackParamList>;
-
+type UserData = {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+};
 const SettingScreen = () => {
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const navigation = useNavigation<ScreenNavigationProp>();
   const { logout } = useAuth();
-
+    const { user, updateUserProfile, uploadAvatar } = useUser();
+      const [imageUri, setImageUri] = useState<string | null>(null);
+      const [data, setData] = useState<UserData>({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+      });
+  useEffect(() => {
+    if (user) {
+      setData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        username: user.username || '',
+        email: user.email || '',
+      });
+      setImageUri(user.avatar);
+    }
+  }, [user]);
   const HandleLogout = async () => {
     await logout();
   };
@@ -73,7 +97,7 @@ const SettingScreen = () => {
               <View className="flex flex-row justify-between items-center">
                 <View className="flex flex-row items-center gap-2">
                   <CircleImage
-                    image="https://randomuser.me/api/portraits/men/32.jpg"
+                    image={imageUri || 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png'}
                     size={responsiveWidth(15)}
                   />
                   <View>
@@ -148,7 +172,7 @@ const SettingScreen = () => {
                   <TouchableOpacity
                     key={label}
                     onPress={() =>
-                      navigation.navigate(screen as keyof RootStackParamList)
+                      navigation.navigate(screen)
                     }
                   >
                     <Text

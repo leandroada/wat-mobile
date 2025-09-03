@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,9 @@ import {
 import useKeyboardVisible from '../../hooks/useKeyboardVisible';
 import axios from 'axios';
 import { API_BASE_URL } from '@env';
+import CheckInEllipse from '../../assets/icons/CheckInEllipse';
+import { useToast } from 'react-native-toast-notifications';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 type RegisterScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Register'
@@ -35,21 +38,41 @@ type RegisterScreenNavigationProp = NativeStackNavigationProp<
 const RegisterScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const isKeyboardVisible = useKeyboardVisible();
-
+  const toast = useToast();
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const passwordRules = useMemo(
+    () => ({
+      hasMinLength: password.length >= 8,
+      hasNumber: /\d/.test(password),
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasSpecialChar: /[^A-Za-z0-9]/.test(password),
+    }),
+    [password],
+  );
   const [errors, setErrors] = useState({
     username: '',
     firstName: '',
     lastName: '',
+    mobileNumber: '',
     email: '',
     password: '',
   });
+  useEffect(() => {
+    // Show all non-empty error messages as toasts
+    Object.values(errors).forEach(error => {
+      if (error) {
+        toast.show(error, { type: 'danger' });
+      }
+    });
+  }, [errors]);
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -59,12 +82,13 @@ const RegisterScreen = () => {
 
     const newErrors = {
       username: username
-        ? username.length >= 8
+        ? username.length >= 3
           ? ''
-          : 'Username must be at least 8 characters.'
+          : 'Username must be at least 3 characters.'
         : 'Username is required.',
       firstName: firstName ? '' : 'First name is required.',
       lastName: lastName ? '' : 'Last name is required.',
+      mobileNumber: mobileNumber ? '' : 'Mobile number is required.',
       email: email
         ? validateEmail(email)
           ? ''
@@ -78,59 +102,64 @@ const RegisterScreen = () => {
     };
 
     setErrors(newErrors);
-    const hasError = Object.values(newErrors).some(msg => msg !== '');
-    if (hasError) {
+    const hasFieldErrors = Object.values(newErrors).some(msg => msg !== '');
+    const passwordFails = Object.values(passwordRules).some(
+      rule => rule === false,
+    );
+
+    if (hasFieldErrors || passwordFails) {
       console.log('Validation failed ❌', newErrors);
-      Alert.alert('Validation Error', 'Please correct the highlighted fields.');
+      toast.show(
+        passwordFails
+          ? 'Password must meet all requirements.'
+          : 'Please check your input and try again.',
+        { type: 'danger' },
+      );
       return;
     }
 
     try {
       setLoading(true);
-      console.log('Sending request...' ,         {
-          userEmail: email,
-          username,
-          password,
-          firstName,
-          lastName,
+      console.log('Sending request...', {
+        userEmail: email,
+        username,
+        password,
+        firstName,
+        lastName,
+        mobileNumber,
+      });
+      const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, {
+        userEmail: email,
+        username,
+        password,
+        firstName,
+        lastName,
+        mobileNumber,
+      });
+
+      console.log(
+        'API Response:',
+        response.data,
+        response.data.data.requiresVerification,
+      );
+
+      toast.show(response.data.message || 'Account created successfully!', {
+        type: 'success',
+      });
+
+      if (response.data.data.requiresVerification) {
+        navigation.navigate('Verification', {
+          userId: response.data.data.userId,
+          email: email,
         });
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/signup`,
-        {
-          userEmail: email,
-          username,
-          password,
-          firstName,
-          lastName,
-        }
-      );
-
-      console.log('API Response:', response.data);
-
-      Alert.alert(
-        'Success',
-        response.data.message || 'Account created successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              if (response.data.requiresVerification) {
-                navigation.navigate('Verification', {
-                  userId: response.data.userId,
-                  email: email,
-                });
-              }
-            },
-          },
-        ]
-      );
+      }
     } catch (err: any) {
       const errorMsg =
         err.response?.data?.message ||
         'Something went wrong. Please try again later.';
 
       console.log('API Error:', err.response?.data || err.message);
-      Alert.alert('Error', errorMsg, [{ text: 'OK' }]);
+      toast.show(errorMsg, { type: 'danger' });
     } finally {
       setLoading(false);
     }
@@ -156,22 +185,19 @@ const RegisterScreen = () => {
           <Logo width={220} height={70} />
         </View>
 
-        <KeyboardAvoidingView
-          behavior="padding"
-          className="flex-1"
-        >
+        <KeyboardAvoidingView behavior="padding" className="flex-1">
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <ScrollView
               contentContainerStyle={{
                 alignItems: 'center',
-                paddingBottom: responsiveHeight(8),
+                paddingBottom: responsiveHeight(0),
               }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
-              className="z-10"
+              className="z-10 flex-1"
             >
               <View
-                className="gap-8 px-4"
+                className="gap-3 px-4"
                 style={{ width: responsiveWidth(90) }}
               >
                 {[
@@ -192,6 +218,12 @@ const RegisterScreen = () => {
                     value: lastName,
                     set: setLastName,
                     error: errors.lastName,
+                  },
+                  {
+                    label: 'Mobile Number',
+                    value: mobileNumber,
+                    set: setMobileNumber,
+                    error: errors.mobileNumber,
                   },
                   {
                     label: 'Email',
@@ -223,31 +255,109 @@ const RegisterScreen = () => {
                       >
                         {label}
                       </Text>
-                      <TextInput
-                        value={value}
-                        onChangeText={set}
-                        keyboardType={keyboardType}
-                        secureTextEntry={secureTextEntry}
-                        placeholder={error !== '' ? error : label}
-                        placeholderTextColor={error !== '' ? 'red' : 'gray'}
-                        className="bg-white rounded-md text-primary font-llewie px-3"
-                        style={{
-                          width: '75%',
-                          height: responsiveHeight(5),
-                          fontSize: responsiveFontSize(1.5),
-                        }}
-                      />
+                      {label !== 'Password' ? (
+                        <TextInput
+                          value={value}
+                          onChangeText={set}
+                          keyboardType={keyboardType}
+                          secureTextEntry={secureTextEntry}
+                          className="bg-textLight rounded-md font-llewie px-3 text-textDark"
+                          style={{
+                            width: responsiveWidth(63),
+                            height: responsiveHeight(4.5),
+                            fontSize: responsiveFontSize(1.5),
+                          }}
+                        />
+                      ) : (
+                        <View className="relative">
+                          <TextInput
+                            value={value}
+                            onChangeText={set}
+                            keyboardType={keyboardType}
+                            secureTextEntry={showPassword}
+                            className="bg-textLight rounded-md font-llewie px-3 text-textDark"
+                            style={{
+                              width: responsiveWidth(63),
+                              height: responsiveHeight(4.5),
+                              fontSize: responsiveFontSize(1.5),
+                            }}
+                          />
+                          <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-[15%]"
+                          >
+                            <Ionicons
+                              name={showPassword ? 'eye-off' : 'eye'} // 👈 toggle icons
+                              size={22}
+                              color="#666"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      )}
                     </View>
-                  )
+                  ),
                 )}
+                <View className="flex mt-2 gap-1">
+                  <Text className="text-textLight text-xl text-center font-llewie">
+                    Password must contain at least:
+                  </Text>
+                  <View className="flex flex-wrap flex-row gap-2 justify-center items-center">
+                    <View className="flex-row items-center gap-1 ">
+                      <CheckInEllipse checked={passwordRules.hasMinLength} />
+                      <Text className="text-white font-llewie">
+                        8 characters
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <CheckInEllipse checked={passwordRules.hasNumber} />
+                      <Text className="text-white font-llewie">1 number</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <CheckInEllipse checked={passwordRules.hasUppercase} />
+                      <Text className="text-white font-llewie">
+                        1 uppercase
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <CheckInEllipse checked={passwordRules.hasLowercase} />
+                      <Text className="text-white font-llewie">
+                        1 lowercase
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <CheckInEllipse checked={passwordRules.hasSpecialChar} />
+                      <Text className="text-white font-llewie">
+                        1 special character
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View className="flex-row justify-center items-center gap-2 ">
+                  <Text
+                    className="text-textLight font-llewie"
+                    style={{ fontSize: responsiveFontSize(1.9) }}
+                  >
+                    Have an account?
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Login')}
+                  >
+                    <Text
+                      className="text-secondary font-llewie"
+                      style={{ fontSize: responsiveFontSize(1.9) }}
+                    >
+                      Log in here
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
                 <View className="w-full items-center">
                   <TouchableOpacity
                     className="bg-highlight rounded-md items-center justify-center"
                     style={{
-                      width: '90%',
+                      width: '95%',
                       height: responsiveHeight(6.3),
-                      marginTop: responsiveHeight(4),
+                      marginTop: responsiveHeight(1),
                     }}
                     onPress={onSubmit}
                     disabled={loading}
