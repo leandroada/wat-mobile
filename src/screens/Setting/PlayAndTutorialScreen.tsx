@@ -54,7 +54,7 @@ const PlayAndTutorialScreen = () => {
               </Text>
 
               <View className="flex gap-1 px-2 mt-10">
-                {['Quick-Start Guide', 'Puzzle Tutorial', 'Advance Tips & Scoring'].map(
+                {['Puzzle Instructions ', 'Puzzle Tutorial', 'Advance Tips & Scoring','Daily Challenge Instructions'].map(
                   (label, index) => (
                     <View key={index}>
                       <Text
