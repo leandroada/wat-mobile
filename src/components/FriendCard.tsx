@@ -45,7 +45,7 @@ const FriendCard = ({
       </View>
 
       {/* Right Side: Buttons */}
-      {Online ? (
+      {Online && friendsData === "Online" ? (
         <View className="flex-row">
           {/* Play Button */}
           <TouchableOpacity className="bg-primary h-[4.5rem] w-[5rem] flex justify-center items-center"

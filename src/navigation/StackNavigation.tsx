@@ -6,6 +6,8 @@ import VerificationScreen from '../screens/Auth/VerificationScreen';
 import StartScreen from '../screens/Auth/StartScreen';
 import SplashScreen from '../screens/Splash/SplashScreen';
 import { useAuth } from '../context/AuthContext';
+import PasswordRecoveryScreen from '../screens/Auth/PasswordRecoveryScreen';
+import UsernameRecoveryScreen from '../screens/Auth/UsernameRecoveryScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -13,6 +15,8 @@ export type RootStackParamList = {
   Register: undefined;
   Verification: undefined;
   Login: undefined;
+  passwordrecovery : undefined;
+  usernamerecovery : undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,6 +37,8 @@ const StackNavigation = () => {
       <Stack.Screen name="Start" component={StartScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Verification" component={VerificationScreen} />
+      <Stack.Screen name="passwordrecovery" component={PasswordRecoveryScreen} />
+      <Stack.Screen name="usernamerecovery" component={UsernameRecoveryScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
     </Stack.Navigator>
   );

@@ -200,7 +200,7 @@ const MyFriendsScreen = () => {
                   </Text>
                 </View>
               ) : (
-                <FlatList
+                friendsData === "Online"?( users.filter(user=> user.isOnline).length > 0 ? (<FlatList
                   data={users}
                   keyExtractor={item => item.id}
                   renderItem={({ item }) => (
@@ -219,7 +219,30 @@ const MyFriendsScreen = () => {
                   )}
                   contentContainerStyle={{ padding: 10 }}
                   ItemSeparatorComponent={() => <View className="h-3" />}
-                />
+                />):(<View className="flex-1 justify-start mt-10 items-center">
+                  <Text className="text-primary font-llewie">
+                    No users found
+                  </Text>
+                </View>)):(<FlatList
+                  data={users}
+                  keyExtractor={item => item.id}
+                  renderItem={({ item }) => (
+                    <FriendCard
+                      Rank={item.globalRank || 0}
+                      Id={item.id}
+                      Online={item.isOnline}
+                      Username={item.username}
+                      image={
+                        item.avatar ||
+                        'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png'
+                      }
+                      friendsData={friendsData}
+                      handleRequest={HandleRequest}
+                    />
+                  )}
+                  contentContainerStyle={{ padding: 10 }}
+                  ItemSeparatorComponent={() => <View className="h-3" />}
+                />)
               )}
             </View>
           </View>

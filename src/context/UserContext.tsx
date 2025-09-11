@@ -80,7 +80,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUser(response.data.user);
       console.log(response.data.user);
       
-      // toast.show('Profile updated successfully.', { type: 'success' });
+      toast.show('Profile updated successfully.', { type: 'success' });
     } catch (error: any) {
       if (error.response?.status === 409) {
         toast.show('Username already exists.', { type: 'danger' });

@@ -68,15 +68,16 @@ const HomeScreen = () => {
   const onShare = async () => {
     try {
       await Share.open({
-        title: 'Invite to My App',
+        title: 'Join me on The Bible With a Twist!',
+        subject: 'Invite to The Bible With a Twist',
         message:
-          'Hey! 👋 I’m inviting you to try this awesome app. Download it here: https://Twistapp.com/download',
-        url: 'https://twistapp.com/download', // optional, adds a clickable link
+          'Hey! 👋 I’m inviting you to try this awesome game, The Bible With a Twist. Download it here: https://withatwist.vcern.com',
       });
     } catch (error) {
       console.log('Share error:', error);
     }
   };
+
   return (
     <ImageBackground
       source={require('../../assets/images/bg_Home.png')}
@@ -274,14 +275,16 @@ const HomeScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
-            <View className=' relative -z-20' style={{ width: '100%', height: responsiveWidth(43) }}>
+            <View
+              className=" relative -z-20"
+              style={{ width: '100%', height: responsiveWidth(43) }}
+            >
               <Image
                 source={require('../../assets/images/character_home_img.png')}
                 resizeMode="contain"
                 className=" -z-10 absolute -bottom-3 "
                 style={{ width: '100%', height: responsiveWidth(43) }}
               />
-              
             </View>
 
             <View />

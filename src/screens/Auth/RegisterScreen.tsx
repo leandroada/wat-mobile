@@ -164,6 +164,19 @@ const RegisterScreen = () => {
       setLoading(false);
     }
   };
+  // helper function
+  const formatPhoneNumber = (text: string) => {
+    const cleaned = text.replace(/\D/g, '');
+    const limited = cleaned.slice(0, 10);
+
+    if (limited.length < 4) return limited;
+    if (limited.length < 7) {
+      return `(${limited.slice(0, 3)}) ${limited.slice(3)}`;
+    }
+    return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(
+      6,
+    )}`;
+  };
 
   return (
     <ImageBackground
@@ -222,9 +235,12 @@ const RegisterScreen = () => {
                   {
                     label: 'Mobile Number',
                     value: mobileNumber,
-                    set: setMobileNumber,
+                    set: (text: string) =>
+                      setMobileNumber(formatPhoneNumber(text)),
                     error: errors.mobileNumber,
+                    keyboardType: 'number-pad' as const,
                   },
+
                   {
                     label: 'Email',
                     value: email,
@@ -258,7 +274,23 @@ const RegisterScreen = () => {
                       {label !== 'Password' ? (
                         <TextInput
                           value={value}
-                          onChangeText={set}
+                          onChangeText={text => {
+                            if (label === 'Username' || label === 'Email') {
+                              set(text.toLowerCase()); // 👈 force lowercase
+                            } else {
+                              set(text);
+                            }
+                          }}
+                          autoCapitalize={
+                            label === 'Username' || label === 'Email'
+                              ? 'none'
+                              : 'sentences'
+                          }
+                          autoCorrect={
+                            label === 'Username' || label === 'Email'
+                              ? false
+                              : true
+                          }
                           keyboardType={keyboardType}
                           secureTextEntry={secureTextEntry}
                           className="bg-textLight rounded-md font-llewie px-3 text-textDark"
@@ -274,7 +306,7 @@ const RegisterScreen = () => {
                             value={value}
                             onChangeText={set}
                             keyboardType={keyboardType}
-                            secureTextEntry={showPassword}
+                            secureTextEntry={!showPassword}
                             className="bg-textLight rounded-md font-llewie px-3 text-textDark"
                             style={{
                               width: responsiveWidth(63),

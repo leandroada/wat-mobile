@@ -95,7 +95,7 @@ const LoginScreen = () => {
 
             {/* Form */}
             <View
-              className="w-full px-6 flex items-center gap-7 z-10m mt-12"
+              className="w-full px-6 flex items-center gap-4 z-10 mt-16"
               style={{ paddingTop: responsiveHeight(3) }}
             >
               {/* Email/Username */}
@@ -108,14 +108,12 @@ const LoginScreen = () => {
                 </Text>
                 <TextInput
                   value={emailOrUsername}
-                  onChangeText={setEmailOrUsername}
-                  // placeholder={
-                  //   errors.emailOrUsername || 'Enter email or username'
-                  // }
-                  // placeholderTextColor={errors.emailOrUsername ? 'red' : '#666'}
+                  onChangeText={text => setEmailOrUsername(text.toLowerCase())} // 👈 force lowercase
+                  autoCapitalize="none" // 👈 prevents iOS from auto-capitalizing
+                  autoCorrect={false} // 👈 avoids auto-correct issues
                   className="bg-textLight rounded-md font-llewie text-primary px-4"
                   style={{
-                    width: responsiveWidth(75),
+                    width: responsiveWidth(70),
                     height: responsiveHeight(5.5),
                     fontSize: responsiveFontSize(1.8),
                   }}
@@ -130,21 +128,21 @@ const LoginScreen = () => {
                 >
                   Password
                 </Text>
-                <View className='relative'>
+                <View className="relative">
                   <TextInput
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     className="bg-textLight rounded-md font-llewie px-4 text-textDark"
                     style={{
-                      width: responsiveWidth(75),
+                      width: responsiveWidth(70),
                       height: responsiveHeight(5.5),
                       fontSize: responsiveFontSize(1.8),
                     }}
                   />
                   <TouchableOpacity
                     onPress={() => setShowPassword(!showPassword)}
-                    className='absolute right-4 top-3 '
+                    className="absolute right-4 top-3 "
                   >
                     <Ionicons
                       name={showPassword ? 'eye-off' : 'eye'} // 👈 toggle icons
@@ -156,7 +154,7 @@ const LoginScreen = () => {
               </View>
 
               {/* Login Button */}
-              <View className="w-full items-center mt-2">
+              <View className="w-full items-center mt-4">
                 <TouchableOpacity
                   className="bg-highlight rounded-md items-center justify-center"
                   style={{
@@ -181,14 +179,14 @@ const LoginScreen = () => {
               </View>
               <View>
                 {/* Forgot username */}
-                <View className="flex-row justify-center items-center gap-2 mt-8 mb-2">
+                <View className="flex-row justify-center items-center gap-2 mt-2 mb-2">
                   <Text
                     className="text-textLight font-llewie"
                     style={{ fontSize: responsiveFontSize(1.8) }}
                   >
                     Forgot Username?
                   </Text>
-                  <TouchableOpacity onPress={() => {}}>
+                  <TouchableOpacity onPress={() => {navigation.navigate("usernamerecovery")}}>
                     <Text
                       className="text-secondary font-llewie"
                       style={{ fontSize: responsiveFontSize(1.8) }}
@@ -205,7 +203,7 @@ const LoginScreen = () => {
                   >
                     Forgot Password?
                   </Text>
-                  <TouchableOpacity onPress={() => {}}>
+                  <TouchableOpacity onPress={() => {navigation.navigate("passwordrecovery")}}>
                     <Text
                       className="text-secondary font-llewie"
                       style={{ fontSize: responsiveFontSize(1.8) }}

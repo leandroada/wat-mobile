@@ -44,6 +44,25 @@ const ProfileScreen: React.FC = () => {
     phone: '',
   });
   const [loading, setLoading] = useState(false); // <-- Loading state
+  // Format phone number as (123) 456-7890
+  const formatUSPhone = (value: string) => {
+    // Keep only digits
+    const cleaned = value.replace(/\D/g, '').slice(0, 10); // limit 10 digits
+
+    let formatted = cleaned;
+    if (cleaned.length > 6) {
+      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(
+        3,
+        6,
+      )}-${cleaned.slice(6)}`;
+    } else if (cleaned.length > 3) {
+      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+    } else if (cleaned.length > 0) {
+      formatted = `(${cleaned}`;
+    }
+
+    return formatted;
+  };
 
   /** Load user data into form when available */
   useEffect(() => {
@@ -70,7 +89,14 @@ const ProfileScreen: React.FC = () => {
   };
 
   const handleChange = (field: keyof FormState, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    if (field === 'phone') {
+      setForm(prev => ({
+        ...prev,
+        phone: formatUSPhone(value),
+      }));
+    } else {
+      setForm(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleUpdate = async () => {
@@ -102,14 +128,14 @@ const ProfileScreen: React.FC = () => {
       if (imageUri && imageUri !== user?.avatar) {
         await uploadAvatar(imageUri);
       }
-    toast.show('Profile updated successfully.', {
-      type: 'success',
-    });
+      // toast.show('Profile updated successfully.', {
+      //   type: 'success',
+      // });
     } catch (error) {
       console.error('Update Error:', error);
-    toast.show('Failed to update profile.', {
-      type: 'danger',
-    });
+      // toast.show('Failed to update profile.', {
+      //   type: 'danger',
+      // });
     } finally {
       setLoading(false);
     }
@@ -228,6 +254,8 @@ const ProfileScreen: React.FC = () => {
                     <TextInput
                       value={form.phone}
                       onChangeText={text => handleChange('phone', text)}
+                      keyboardType="number-pad"
+                      maxLength={14} // (123) 456-7890
                       className="bg-[#D9D9D9] px-4 py-1 rounded-lg text-xl font-llewie text-primary"
                     />
                   </View>

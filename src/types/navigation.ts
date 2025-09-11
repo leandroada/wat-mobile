@@ -19,4 +19,6 @@ export type RootStackParamList = {
   MyFriends:undefined;
   GameScreen:undefined
   playtutorial:undefined
+  usernamerecovery:undefined;
+  passwordrecovery:undefined;
 };
