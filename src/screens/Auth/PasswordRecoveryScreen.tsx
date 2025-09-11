@@ -58,7 +58,7 @@ const PasswordRecoveryScreen = () => {
       toast.show(message, { type: 'success' });
     } catch (err: any) {
       const errorMsg =
-        err.response?.data?.message ||
+        err.response?.data?.error?.message ||
         'Something went wrong. Please try again.';
       console.log('Password Reset Error:', err.response?.data || err.message);
       toast.show(errorMsg, { type: 'danger' });

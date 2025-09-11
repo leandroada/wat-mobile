@@ -155,10 +155,10 @@ const RegisterScreen = () => {
       }
     } catch (err: any) {
       const errorMsg =
-        err.response?.data?.message ||
+        err.response?.data?.error?.message ||
         'Something went wrong. Please try again later.';
 
-      console.log('API Error:', err.response?.data || err.message);
+      console.log('API Error:', err.response?.data?.error?.message || err.message);
       toast.show(errorMsg, { type: 'danger' });
     } finally {
       setLoading(false);

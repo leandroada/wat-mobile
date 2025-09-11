@@ -55,7 +55,7 @@ const VerificationScreen = () => {
         type: 'success',
       });
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Failed to resend OTP.';
+      const errorMsg = err.response?.data?.error?.message || 'Failed to resend OTP.';
       console.log('Resend OTP Error:', err.response?.data || err.message);
       toast.show(errorMsg, { type: 'danger' });
     }
