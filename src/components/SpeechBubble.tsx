@@ -9,6 +9,8 @@ interface SpeechBubbleProps {
   triangleOffsetX?: number; // triangle horizontal position control
   textTopOffset?: number; // move text up/down
   fontSize?: number;
+  color?:string;
+  textColor?:string;
 }
 
 const SpeechBubble: React.FC<SpeechBubbleProps> = ({
@@ -18,6 +20,8 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({
   triangleOffsetX = 95,
   textTopOffset = 40,
   fontSize = 20,
+  color="#1C75BC",
+  textColor="white"
 }) => {
   const bubblePath = `M4 20C4 8.954 12.954 0 24 0h${
     svgWidth - 48
@@ -33,7 +37,7 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({
     <View style={[styles.wrapper, { width: svgWidth, height: svgHeight }]}>
       {/* SVG Bubble */}
       <Svg width={svgWidth} height={svgHeight} fill="none">
-        <G fill="#1C75BC">
+        <G fill={color}>
           <Path d={bubblePath} />
           <Path d={trianglePath} />
         </G>
@@ -49,7 +53,7 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({
           },
         ]}
       >
-        <Text className={"font-llewie text-white  text-5xl text-center"}>
+        <Text className={"font-llewie text-white text-center"} style={{fontSize : fontSize, color:textColor}}>
           {message}
         </Text>
       </View>
